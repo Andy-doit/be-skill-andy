@@ -153,3 +153,10 @@
   - Ran `node scripts/check-loosening.mjs`: 0 violations.
   - Ran `node scripts/check-secrets.mjs`: 0 leaks.
 - **Status:** Complete & verified.
+
+## 2026-11-19 — Installation for Claude Code
+
+- **Action:** Installed `be-skill-andy` globally into Claude Code via Windows directory junctions.
+- **Target Path:** `C:\Users\Endy\.claude\skills\`
+- **Skills Linked (13 total):** `be`, `be-ai`, `be-api`, `be-arch`, `be-async`, `be-audit`, `be-auth`, `be-authz`, `be-ops`, `be-persist`, `be-resilience`, `be-sec`, `be-test`.
+- **Status:** Complete & verified. All 13 directory junctions active and pointing directly to `D:\work\AI\be-skill-andy\skills\*`.
