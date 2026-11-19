@@ -57,11 +57,11 @@ Identify the primary concern and dispatch to the owning skill by name:
 | **API Design & Contracts** | REST, GraphQL, OpenAPI, endpoints, error codes, webhooks, SSE, realtime | `be-api` | [api-design.md](../be-api/references/api-design.md) |
 | **Authentication & Session** | login, JWT, session, cookies, HttpOnly, SameSite, tokens, password hash | `be-auth` | [session-and-tokens.md](../be-auth/references/session-and-tokens.md) |
 | **Authorization & Tenant** | permission, roles, default-deny, domain check, multi-tenancy, RLS | `be-authz` | [resource-authz.md](../be-authz/references/resource-authz.md) |
-| **Persistence & Schema** | database, migrations, expand-contract, transactions, locking, index, SQL | `be-persist` | [migrations-schema.md](../be-persist/references/migrations-schema.md) |
-| **Async, Queues & Jobs** | idempotency key, outbox, BullMQ, NATS, Kafka, background jobs, sagas | `be-async` | [idempotency.md](../be-async/references/idempotency.md) |
+| **Persistence & Schema** | database, migrations, expand-contract, transactions, locking, index, SQL, read replica lag, sharding, partitioning | `be-persist` | [migrations-schema.md](../be-persist/references/migrations-schema.md) |
+| **Async, Queues & Jobs** | idempotency key, outbox, CDC, Debezium, BullMQ, NATS, Kafka, background jobs, sagas | `be-async` | [idempotency.md](../be-async/references/idempotency.md) |
 | **Outbound & Resilience** | external HTTP, timeouts, circuit breaker, caching, Redis, S3 upload | `be-resilience` | [outbound-resilience.md](../be-resilience/references/outbound-resilience.md) |
 | **Operations & Runtime** | env config, secrets, logging, tracing, liveness, readiness, Docker, deploy | `be-ops` | [config-secrets.md](../be-ops/references/config-secrets.md) |
-| **Security & Limits** | rate limit, payload size, file limits, SSRF, CORS, privacy, PII | `be-sec` | [abuse-limits.md](../be-sec/references/abuse-limits.md) |
+| **Security & Limits** | rate limit, distributed rate limiting, token bucket, payload size, file limits, SSRF, CORS, privacy, PII | `be-sec` | [abuse-limits.md](../be-sec/references/abuse-limits.md) |
 | **Testing Strategy** | integration test, race conditions, unit doubles, contract test, fixtures | `be-test` | [test-pyramid.md](../be-test/references/test-pyramid.md) |
 | **AI / LLM Integration** | LLM gateway, model quotas, prompt safety, agent loops, tool authority | `be-ai` | [llm-gateway.md](../be-ai/references/llm-gateway.md) |
 | **Code Review & Auditing** | review, audit, check standards, inspect PR, find violations | `be-audit` | [audit-checklist.md](../be-audit/references/audit-checklist.md) |

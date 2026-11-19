@@ -17,7 +17,7 @@ Read this when creating a new service, feature, or module, or reorganizing an ex
 
 ## 3. Rules
 
-### BE-24 Flat trigger-based operation shape
+### Operation Organization by Trigger (Applying Rule BE-24)
 Operations are organized under the trigger kind that invokes them. Within an operation folder, all related artifacts (input validation schema, output contract, handler, mapping logic) are findable from the operation name without jumping across distant directories.
 - **Why:** Developers spend 80% of time navigating between controller, service, DTO, and mapper for a single endpoint. Co-locating them by operation makes changes cohesive and reviewable.
 - **Enforced by:** Code review and directory structure linting.

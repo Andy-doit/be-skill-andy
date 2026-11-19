@@ -120,7 +120,26 @@ A claim about concurrency, crash recovery, authorization, or idempotency must be
 
 ---
 
-## 3. Definition of Done (DoD)
+## 3. Hyper-Scale & Distributed Systems Invariants (BE-34..36)
+
+### BE-34 Read-After-Write Consistency
+Immediately following a mutating operation, any subsequent read query within the same client session or causality chain that depends on the mutated state must route to the primary database or verify that the chosen read replica has replayed past the mutation's Log Sequence Number (LSN); routing reads blindly to asynchronous read replicas immediately after a write is forbidden.
+- **Why:** Physical replication lag causes phantom 404s and stale reads immediately following mutations.
+- **Enforced by:** Connection router integration tests and session write-pinning verification. (Owned by `be-persist`).
+
+### BE-35 Atomic Distributed Rate Limiting
+All distributed rate limiting counters, quotas, and token allowances shared across application nodes must be evaluated and mutated within a single atomic execution boundary (such as an atomic Redis Lua script). Multi-step GET-then-SET sequences across network hops are forbidden. Every rate-limiting door must explicitly declare its degradation mode (fail-open vs fail-close).
+- **Why:** Non-atomic checks allow concurrent bursts to bypass quotas by $N\times$; in-memory node counters fail behind load balancers; ZSET logs cause $O(N)$ memory explosions under DDoS.
+- **Enforced by:** Concurrency tests and Lua script review. (Owned by `be-sec`).
+
+### BE-36 Shard Key Invariance & Scatter-Gather Fencing
+Every entity stored in a sharded architecture must declare an immutable, high-cardinality Shard Key that deterministically partitions data across database instances; cross-shard distributed transactions (Two-Phase Commit) are forbidden in the online transaction processing (OLTP) path, and OLTP queries omitting the Shard Key (Scatter-Gather fan-out) must be rejected or routed to an asynchronous read index.
+- **Why:** Scatter-gather queries suffer from $\max(T_1, \dots, T_N)$ latency and multi-node failure amplification; mutating shard keys requires distributed locks that degrade throughput.
+- **Enforced by:** Repository query linting and schema constraint review. (Owned by `be-persist`).
+
+---
+
+## 4. Definition of Done (DoD)
 
 A backend task is strictly **NOT done** until:
 - [ ] Code follows the 4-tier dependency direction (`domain` <- `platform` <- `integrations`).

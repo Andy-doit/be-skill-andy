@@ -2,6 +2,25 @@
 
 All notable changes to the `be-skill-andy` backend engineering skill set are documented in this file.
 
+## [1.1.0] - 2026-11-19
+
+### Hyper-Scale & Distributed Systems Expansion
+Expanded `be-skill-andy` to support high-throughput, distributed, and hyper-scale architectures with 3 new engineering laws, 4 deep reference guides, and 2 production playbooks.
+
+### Added
+- **New Engineering Rules (`BE-34..36`):**
+  - **`BE-34` Read-After-Write Consistency:** Mandates session write pinning or LSN/WAL replication token tracking following mutations; forbids blind reads against asynchronous replicas.
+  - **`BE-35` Atomic Distributed Rate Limiting:** Enforces single-boundary atomic evaluation (Redis Lua script) for distributed rate limits; bans non-atomic `GET-then-SET` sequences and $O(N)$ ZSET memory explosion under DDoS; requires declared `fail-open` vs `fail-close` modes.
+  - **`BE-36` Shard Key Invariance & Scatter-Gather Fencing:** Requires immutable high-cardinality shard keys; fences or rejects non-sharded OLTP queries; bans cross-shard Two-Phase Commit (2PC) transactions in online request paths.
+- **Deep Reference Guides:**
+  - `skills/be-sec/references/distributed-rate-limiting.md`: Sliding Window Counter ($O(1)$ memory), production Redis Lua script, and failover strategies.
+  - `skills/be-persist/references/replica-lag.md`: Session write pinning (Sticky Window) and causal consistency via PostgreSQL commit LSN tracking.
+  - `skills/be-persist/references/sharding-and-partitioning.md`: Native declarative partitioning, consistent hashing router with virtual nodes, and scatter-gather avoidance.
+  - `skills/be-async/references/cdc-debezium.md`: Zero-polling Transactional Outbox via PostgreSQL WAL / MySQL Binlog, heartbeat tables to prevent disk exhaustion, and Avro schema evolution.
+- **Production Case Studies (`references/case-studies.md`):**
+  - **Case Study 5:** Distributed Tiered Rate Limiting under 100,000 RPS Attack (Edge IP bounding -> Redis Lua Sliding Window Counter -> Downstream isolation).
+  - **Case Study 6:** Read-After-Write Consistency across Multi-Region PostgreSQL Read Replicas (US-East Primary to Asia Replicas, resolving phantom 404s via LSN cookies and write pinning).
+
 ## [1.0.0] - 2026-11-19
 
 ### Major Architecture Upgrade

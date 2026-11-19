@@ -17,7 +17,7 @@ Read this when mocking dependencies in unit tests, preparing test fixtures, or c
 
 ## 3. Rules
 
-### BE-28 Typed strict doubles & row builders
+### Typed Test Doubles & Row Builders (Applying Rule BE-28)
 Unit tests must use typed test doubles that implement the full port interface. Spies and mocks must be strictly typed (`jest.Mocked<Port>`). Hand-written database rows with 20 dummy fields repeated across test files are banned in favor of reusable Test Data Builders.
 - **Why:** Hand-crafted literal objects rot when schema columns are added or modified, breaking dozens of unrelated test files. Loose untyped mocks pass tests even when the underlying interface signature changes.
 - **Enforced by:** Type checker and code review.

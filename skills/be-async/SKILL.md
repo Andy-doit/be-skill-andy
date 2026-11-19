@@ -19,6 +19,7 @@ Defines standards for transactional messaging, mutation idempotency, queue proce
 
 - [idempotency.md](./references/idempotency.md) — Stable operation identities, committed receipt replay, inbox delivery claims (BE-8, BE-9).
 - [outbox-and-events.md](./references/outbox-and-events.md) — Transactional outbox pattern, atomic database emission, at-least-once relay (BE-2, BE-7).
+- [cdc-debezium.md](./references/cdc-debezium.md) — Hyper-scale zero-polling outbox via Debezium WAL streaming, heartbeat tables, and schema evolution.
 - [jobs-scheduling.md](./references/jobs-scheduling.md) — Fenced background jobs, declared retry ladders, dead letters, single-fire schedules (BE-10, BE-11, BE-13).
 - [sagas.md](./references/sagas.md) — Multi-step distributed flows, compensating undo actions, parked failure alerts (BE-12, BR-5).
 

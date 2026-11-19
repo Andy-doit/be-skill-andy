@@ -131,3 +131,25 @@
   3. Added `D:/work/AI/be-skill-andy/skills` to `C:\Users\Endy\.gemini\config\skills.json`.
   4. Re-ran `scripts/install-skills.ps1 -Tools antigravity` and verified all paths.
   5. Committed and pushed to GitHub remote (commit `92ca8ef`).
+
+## 2026-11-19 — Hyper-Scale Distributed Systems Expansion
+
+- **Phase:** Feature Enhancement (Hyper-scale Distributed Systems)
+- **Objective:** Expand `be-skill-andy` with deep distributed systems knowledge covering Distributed Rate Limiting, Read/Write Replica Lag, Database Sharding, and CDC via Debezium.
+- **Files Created / Modified:**
+  - `skills/be-sec/references/distributed-rate-limiting.md` (Created — Sliding Window Counter, atomic Redis Lua, fail-open/fail-close, BE-35).
+  - `skills/be-persist/references/replica-lag.md` (Created — Session write pinning, LSN tracking, BE-34).
+  - `skills/be-persist/references/sharding-and-partitioning.md` (Created — Consistent hashing, declarative partitions, scatter-gather fencing, BE-36).
+  - `skills/be-async/references/cdc-debezium.md` (Created — Zero-polling outbox, Debezium WAL streaming, heartbeat table, schema registry).
+  - `skills/be-sec/SKILL.md` (Updated — Added BE-35 and reference link).
+  - `skills/be-persist/SKILL.md` (Updated — Added BE-34, BE-36 and reference links).
+  - `skills/be-async/SKILL.md` (Updated — Added CDC reference link).
+  - `skills/be/SKILL.md` (Updated — Expanded routing table keywords).
+  - `references/conventions.md` (Updated — Registered BE-34, BE-35, BE-36).
+  - `references/case-studies.md` (Updated — Added Case Study 5 and Case Study 6).
+  - `CHANGELOG.md` (Updated — Version 1.1.0 release notes).
+- **Verification:**
+  - Ran `node scripts/check-skills.mjs`: 13 skills checked, 0 errors, 0 warnings.
+  - Ran `node scripts/check-loosening.mjs`: 0 violations.
+  - Ran `node scripts/check-secrets.mjs`: 0 leaks.
+- **Status:** Complete & verified.

@@ -124,3 +124,68 @@ Phase 3: Contract (Deploy 3)
    - Connection pool sets session variable upon acquiring connection:
      `SET LOCAL app.current_tenant_id = :tenantId`.
    - Even if a developer accidentally writes `SELECT * FROM invoices WHERE id = :id` without a tenant filter, PostgreSQL blocks Tenant B's rows at the database engine level.
+
+
+---
+
+## Case Study 5: Distributed Tiered Rate Limiting under 100,000 RPS Attack (BE-16, BE-35)
+
+### 1. The Challenge
+- **Traffic:** Coordinated botnet launches a 100,000 RPS traffic surge against `/api/v1/auth/login` and `/api/v1/catalog/search`.
+- **Hazards to Prevent:**
+  - Database connection pool exhaustion caused by unthrottled password-hash CPU operations (Argon2id).
+  - Memory explosion on Redis: Naive Sliding Window Log implementations (ZSET) storing individual timestamps explode to gigabytes of RAM during high RPS attacks ($O(N)$ space complexity).
+  - Rate limit bypasses: In-memory per-process rate limits fail because 20 Kubernetes app pods each allow their own quota, multiplying the effective limit by $20\times$. Multi-step `GET-then-SET` Redis calls suffer race conditions where parallel requests bypass limits.
+
+### 2. Multi-Tier Blueprint & Applied Rules
+1. **Tier 1 (Edge Ingress Gateway - IP Bounding - BE-16):**
+   - Cloudflare / Nginx drops obvious volumetrics exceeding 1,000 req/sec per individual IP address.
+2. **Tier 2 (Distributed Atomic Sliding Window Counter - BE-35):**
+   - Uses atomic Redis Lua script implementing the time-weighted Sliding Window Counter:
+     $$\text{Estimated Count} = \text{Count}_{\text{prev}} \times \left(1 - \frac{\text{elapsed}}{\text{window}}\right) + \text{Count}_{\text{curr}}$$
+   - **$O(1)$ Memory Footprint:** Exactly 2 integer keys per subject; memory per active user remains $< 200$ bytes regardless of request volume.
+   - **Atomic Execution:** Single round-trip to Redis evaluates threshold, increments counter, and sets TTL atomically. Zero race conditions.
+3. **Tier 3 (Degradation & Failure Strategy - BE-35):**
+   - `/api/v1/auth/login` is configured as **`fail-close`**: If Redis becomes unresponsive, login is refused to prevent brute-force attacks against the database.
+   - `/api/v1/catalog/search` is configured as **`fail-open`**: If Redis becomes unresponsive, traffic passes through to cached read replicas.
+
+### 3. Verification & Proof Boundary (BW-P10, BE-28)
+- Test script executes 500 concurrent workers via `Promise.all()` against a limit of 50 requests per minute:
+  - Exactly 50 requests return HTTP 200.
+  - Exactly 450 requests return HTTP 429 Too Many Requests with headers `X-RateLimit-Limit: 50`, `X-RateLimit-Remaining: 0`, and `Retry-After: 42`.
+  - Redis memory consumption stays flat under load ($O(1)$).
+
+---
+
+## Case Study 6: Read-After-Write Consistency across Multi-Region PostgreSQL Read Replicas (BE-34)
+
+### 1. The Challenge
+- E-commerce platform operates with Primary PostgreSQL in US-East (`us-east-1`) and asynchronous read replicas in AP-Southeast (`ap-southeast-1`, Tokyo/Singapore).
+- Network replication latency between US and Asia is typically 150ms–300ms.
+- **The Critical Bug:** A customer in Tokyo places an order (`POST /api/v1/orders`). The server returns HTTP 201 with `{ order_id: 'ord_123' }`. The frontend immediately redirects the browser to `/orders/ord_123`. The browser sends `GET /api/v1/orders/ord_123`, which the regional load balancer routes to the local Tokyo Read Replica. The replica is lagging by 250ms and has not yet replayed the WAL commit -> Returns HTTP 404 "Order Not Found".
+- **The Consequence:** Customer assumes order failed, clicks "Submit Order" a second time, resulting in duplicate purchases, payment disputes, and emergency support escalations.
+
+### 2. Multi-Layer Consistency Blueprint & Applied Rules
+- **Rule BE-34 (Read-After-Write Invariant):** Blindly routing read queries to asynchronous replicas immediately after a write is strictly forbidden.
+- **Layer 1: Session-Based Write Pinning (Sticky Window):**
+  - Upon successful order mutation, the API response attaches a short-lived signed cookie or header:
+    `X-Write-Pin: 1700000005` (representing current timestamp + 5,000ms pin window).
+  - The API Gateway and application database connection router inspect the incoming request:
+    - If `currentTime < writePinTimestamp`: Route the read query directly to the **Primary Database**.
+    - If `currentTime >= writePinTimestamp`: Route to local **Read Replica**.
+- **Layer 2: Causal Consistency via LSN Check (PostgreSQL WAL):**
+  - For high-volume reporting or catalog reads where routing to Primary would create connection contention:
+  - Primary DB returns commit position: `SELECT pg_current_wal_lsn() AS lsn;` (e.g. `'0/16B3740'`).
+  - Read Replica gateway verifies:
+    ```sql
+    SELECT pg_last_wal_replay_lsn() >= '0/16B3740'::pg_lsn AS has_replayed;
+    ```
+  - If `has_replayed = true`: Serve immediately from regional replica with sub-5ms local latency.
+  - If `has_replayed = false`: Wait up to 50ms for catch-up; if still lagging, fallback to Primary.
+
+### 3. Verification & Proof Boundary (BW-P10, BE-28)
+- Test setup introduces an artificial 300ms WAL replay sleep on the read replica test container.
+- Test runner fires 100 sequential `CreateOrder -> GetOrderDetails` cycles:
+  - 100% of read queries return the freshly created order (HTTP 200).
+  - Zero HTTP 404 errors observed.
+  - Primary database connection pool metrics show traffic returns to read replicas immediately after the 5-second pin window expires.
