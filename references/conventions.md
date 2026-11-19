@@ -67,9 +67,11 @@ Verification of non-trivial architectural changes must run on a clean checkout, 
 - **Why:** Self-grading inherently suffers from confirmation bias and misses blind spots.
 - **Enforced by:** Multi-agent review protocol and CI pipelines.
 
-### BW-P13 Plan first, small batches, log everything
-Work in disciplined stages: Audit / Plan -> User Approval -> Implement in small batches (at most 3 modules or skills at a time) -> Verify with real output -> Update `work_log.md` and `CHANGELOG.md`.
-- **Why:** Prevents large-scale divergent refactoring and ensures every change is traceable.
+### BW-P13 Plan first, small batches, log everything (Fast-Path vs Full Protocol)
+Work in disciplined stages based on task risk tier:
+- **Fast-Path Protocol:** Trivial changes ($\le 5$ lines in 1 file, pure cosmetic, typo, comment, non-breaking config) that do NOT touch Protected Zones (Money, Auth, Transactions, Migrations, Public API contracts) may execute and verify in one turn without proposal ceremony.
+- **Full Protocol:** Any task $> 5$ lines, multi-file changes, migrations, or architectural modifications requires: Audit / Plan -> User Approval ("chốt") -> Implement in small batches (at most 3 modules or skills at a time) -> Verify with real output -> Update `work_log.md` and `CHANGELOG.md`.
+- **Why:** Prevents large-scale divergent refactoring and ensures high-stakes architectural changes are traceable and explicitly confirmed, while avoiding bureaucratic ceremony for trivial cosmetic edits.
 - **Enforced by:** Process.
 
 ### BW-P14 Neutral shared rules
@@ -133,7 +135,7 @@ All distributed rate limiting counters, quotas, and token allowances shared acro
 - **Enforced by:** Concurrency tests and Lua script review. (Owned by `be-sec`).
 
 ### BE-36 Shard Key Invariance & Scatter-Gather Fencing
-Every entity stored in a sharded architecture must declare an immutable, high-cardinality Shard Key that deterministically partitions data across database instances; cross-shard distributed transactions (Two-Phase Commit) are forbidden in the online transaction processing (OLTP) path, and OLTP queries omitting the Shard Key (Scatter-Gather fan-out) must be rejected or routed to an asynchronous read index.
+Every entity stored in a sharded architecture must declare an immutable, high-cardinality Shard Key that deterministically partitions data across database instances. User-facing OLTP mutation paths must enforce Shard Key routing; cross-shard distributed transactions (Two-Phase Commit) are forbidden in the primary OLTP write path. Controlled Exceptions: Asynchronous offline sagas, administrative/reconciliation background jobs, or dual-write data migrations are permitted cross-shard access when wrapped with explicit latency budgets and failure compensations.
 - **Why:** Scatter-gather queries suffer from $\max(T_1, \dots, T_N)$ latency and multi-node failure amplification; mutating shard keys requires distributed locks that degrade throughput.
 - **Enforced by:** Repository query linting and schema constraint review. (Owned by `be-persist`).
 

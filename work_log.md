@@ -160,3 +160,29 @@
 - **Target Path:** `C:\Users\Endy\.claude\skills\`
 - **Skills Linked (13 total):** `be`, `be-ai`, `be-api`, `be-arch`, `be-async`, `be-audit`, `be-auth`, `be-authz`, `be-ops`, `be-persist`, `be-resilience`, `be-sec`, `be-test`.
 - **Status:** Complete & verified. All 13 directory junctions active and pointing directly to `D:\work\AI\be-skill-andy\skills\*`.
+
+## 2026-11-19 — Peer Review Hardening & Quality Gate Refinement (v1.1.1)
+
+- **Phase:** Quality Hardening & Rule Nuancing
+- **Feedback Addressed:**
+  1. Synchronized `be-audit` matrix with `BE-34..36`.
+  2. Relaxed overly absolute distributed rules (`BE-36` sharding exceptions, `BE-31` unified facade clarity).
+  3. Reduced ceremony for small tasks by establishing Fast-Path protocol ($\le 5$ lines, non-protected).
+  4. Sửa lỗi duplicate `Date.now()` trong `scripts/audit-backend.mjs` và tài liệu hóa heuristic scanning.
+  5. Nâng cấp Consistent Hashing lên 64-bit BigInt với `removeNode` và cảnh báo production.
+- **Files Modified:**
+  - `skills/be-audit/SKILL.md` (Updated to BE-1..36)
+  - `skills/be-audit/references/audit-checklist.md` (Added BE-34, BE-35, BE-36)
+  - `skills/be-persist/references/sharding-and-partitioning.md` (BE-36 controlled exceptions + 64-bit hash router)
+  - `skills/be-ai/references/llm-gateway.md` (BE-31 unified architectural policy)
+  - `skills/be/SKILL.md` (Fast-Path vs Full Protocol)
+  - `references/conventions.md` (BE-36 update + Fast-Path rule in BW-P13)
+  - `scripts/audit-backend.mjs` (Removed duplicate Date.now check)
+  - `scripts/check-loosening.mjs` (Added heuristic documentation)
+  - `CHANGELOG.md` (v1.1.1 release notes)
+- **Verification:**
+  - `node scripts/check-skills.mjs`: 13 skills passed, 0 errors, 0 warnings.
+  - `node scripts/check-loosening.mjs`: 0 violations.
+  - `node scripts/check-secrets.mjs`: 0 leaks.
+  - `node scripts/audit-backend.mjs skills`: 0 violations.
+- **Status:** Complete & verified.

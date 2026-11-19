@@ -11,7 +11,7 @@ description: >
 
 # be-audit — Read-Only Backend Code Audit Mode
 
-Performs comprehensive, read-only architectural and code-quality audits against backend engineering laws (`BE-1..33`) and review obligations (`BR-1..7`).
+Performs comprehensive, read-only architectural and code-quality audits against backend engineering laws (`BE-1..36`) and review obligations (`BR-1..7`).
 
 **Core Mandate:** `be-audit` NEVER mutates code. Its output is an objective, evidence-based findings report.
 
@@ -26,7 +26,7 @@ Performs comprehensive, read-only architectural and code-quality audits against 
 ## 2. Audit Workflow
 
 1. **Identify Scope:** Target directory, module, or git diff to audit.
-2. **Inspect Against Rules:** Scan code against the 33 engineering rules (`BE-1..33`) and 7 review obligations (`BR-1..7`).
+2. **Inspect Against Rules:** Scan code against the 36 engineering rules (`BE-1..36`) and 7 review obligations (`BR-1..7`).
 3. **Classify Severity:**
    - **BLOCKER:** Direct security leak, data loss risk, dual-write hazard, missing authz/auth, or runtime crash hazard (e.g. `BE-1`, `BE-2`, `BE-3`, `BE-14`, `BE-16`, `BE-17`, `BE-19`).
    - **WARN:** Performance bottleneck, unindexed FK, missing idempotency key, unbounded array, loose error handling (e.g. `BE-5`, `BE-9`, `BE-20`, `BE-23`, `BE-25`).

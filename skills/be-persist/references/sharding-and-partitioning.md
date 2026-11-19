@@ -18,7 +18,8 @@ Read this when database tables exceed 50–100 million rows, index sizes exceed 
 ## 3. Rules
 
 ### BE-36 Shard Key Invariance & Scatter-Gather Fencing
-Every entity stored in a sharded architecture must declare an immutable, high-cardinality Shard Key that deterministically partitions data across database instances; cross-shard distributed transactions (Two-Phase Commit) are forbidden in the online transaction processing (OLTP) path, and OLTP queries omitting the Shard Key (Scatter-Gather fan-out) must be rejected or routed to an asynchronous read index.
+Every entity stored in a sharded architecture must declare an immutable, high-cardinality Shard Key that deterministically partitions data across database instances. User-facing OLTP mutation paths must enforce Shard Key routing; cross-shard distributed transactions (Two-Phase Commit) are forbidden in the primary OLTP write path.
+- **Controlled Exceptions:** Asynchronous offline sagas, administrative/reconciliation background jobs, or dual-write data migrations are permitted cross-shard access when wrapped with explicit latency budgets and failure compensations. User-facing cross-shard reads must route to an asynchronous read index or search model.
 - **Why:** Scatter-Gather queries broadcast a single request to all $N$ physical database shards simultaneously. The query's latency is bounded by the *slowest* shard in the cluster ($\max(T_1, \dots, T_N)$), and a failure on any single shard fails the entire user request. Mutating a Shard Key requires moving physical rows across different database nodes, which necessitates distributed locks (2PC) that lock tables, introduce distributed deadlocks, and degrade throughput by orders of magnitude.
 - **Enforced by:** Query boundary audit checking that every OLTP query repository method includes the shard key parameter; schema review verifying immutability of shard key columns.
 
@@ -28,15 +29,18 @@ Every entity stored in a sharded architecture must declare an immutable, high-ca
 
 ### Shard Router with Virtual Nodes
 
-To prevent "Hot Shards" and minimize data migration when expanding shard nodes, use Consistent Hashing with virtual node replication:
+To prevent "Hot Shards" and minimize data migration when expanding shard nodes, use Consistent Hashing with virtual node replication.
+
+> [!WARNING] Production Caveat on Shard Topology Changes
+> Adding or removing a shard node shifts a fraction of key ownership to adjacent nodes. In stateful databases, this requires an asynchronous data migration / dual-read backfill before retiring nodes. For enterprise production, prefer mature clustering coordinators (e.g., **Citus** for PostgreSQL, **Vitess** for MySQL, or an **Envoy** consistent-hash proxy) over custom application-layer routers.
 
 ```typescript
 import { createHash } from 'node:crypto';
 
 export class ConsistentHashRouter {
-  private readonly ring = new Map<number, string>();
-  private readonly sortedKeys: number[] = [];
-  private readonly virtualNodeCount = 100;
+  private readonly ring = new Map<bigint, string>();
+  private sortedKeys: bigint[] = [];
+  private readonly virtualNodeCount = 150;
 
   constructor(nodes: string[]) {
     for (const node of nodes) {
@@ -46,18 +50,28 @@ export class ConsistentHashRouter {
 
   addNode(node: string): void {
     for (let i = 0; i < this.virtualNodeCount; i++) {
-      const hash = this.hash(`${node}#vn${i}`);
-      this.ring.set(hash, node);
-      this.sortedKeys.push(hash);
+      const hash = this.hash64(`${node}#vn${i}`);
+      if (!this.ring.has(hash)) {
+        this.ring.set(hash, node);
+        this.sortedKeys.push(hash);
+      }
     }
-    this.sortedKeys.sort((a, b) => a - b);
+    this.sortedKeys.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  }
+
+  removeNode(node: string): void {
+    for (let i = 0; i < this.virtualNodeCount; i++) {
+      const hash = this.hash64(`${node}#vn${i}`);
+      this.ring.delete(hash);
+    }
+    this.sortedKeys = this.sortedKeys.filter((key) => this.ring.has(key));
   }
 
   getShardNode(shardKey: string): string {
-    if (this.ring.size === 0) throw new Error('No shard nodes available.');
-    const hash = this.hash(shardKey);
+    if (this.ring.size === 0) throw new Error('No shard nodes available in cluster.');
+    const hash = this.hash64(shardKey);
 
-    // Binary search for first node >= hash on the ring
+    // Binary search for first virtual node >= hash on the 64-bit ring
     let low = 0;
     let high = this.sortedKeys.length - 1;
     while (low <= high) {
@@ -69,13 +83,14 @@ export class ConsistentHashRouter {
       }
     }
 
+    // Wrap around to ring start if hash exceeds all nodes
     const targetIndex = low >= this.sortedKeys.length ? 0 : low;
     return this.ring.get(this.sortedKeys[targetIndex])!;
   }
 
-  private hash(value: string): number {
-    const md5 = createHash('md5').update(value).digest();
-    return md5.readUInt32BE(0);
+  private hash64(value: string): bigint {
+    const digest = createHash('sha256').update(value).digest();
+    return digest.readBigUInt64BE(0); // 64-bit address space (2^64) prevents vnode collisions
   }
 }
 ```

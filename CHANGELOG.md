@@ -2,6 +2,20 @@
 
 All notable changes to the `be-skill-andy` backend engineering skill set are documented in this file.
 
+## [1.1.1] - 2026-11-19
+
+### Audit Synchronization, Fast-Path Protocol & Architecture Nuances
+Refined the backend skill set based on comprehensive peer evaluation: synchronized audit checklists, relaxed overly rigid distributed rules with controlled exceptions, introduced Fast-Path protocol for small edits, and eliminated duplicate static scanner warnings.
+
+### Changed
+- **Synchronized `be-audit` to `BE-1..36`:** Updated `skills/be-audit/SKILL.md` and `skills/be-audit/references/audit-checklist.md` with inspection criteria and severities for `BE-34` (Replica Lag), `BE-35` (Distributed Rate Limiting), and `BE-36` (Sharded Queries).
+- **Nuanced Distributed Rules (`BE-36` & `BE-31`):**
+  - `BE-36`: Scoped scatter-gather restrictions to the user-facing OLTP path; added controlled exceptions for asynchronous offline sagas, reconciliation jobs, and data migrations.
+  - `BE-31`: Clarified that the single LLM gateway mandate refers to a unified architectural facade/policy layer (whether an in-process platform module or standalone proxy), not necessarily an isolated physical microservice.
+- **Fast-Path Protocol Added:** Formalized Fast-Path protocol in `skills/be/SKILL.md` and `references/conventions.md` ($\le 5$ lines, non-protected zone, 1-turn execute + verify) to eliminate bureaucratic overhead on trivial fixes.
+- **Static Scanner Fixed:** Removed duplicate `Date.now()` / `new Date()` check in `scripts/audit-backend.mjs` that caused double-flagging on service files; added heuristic notice.
+- **Hardened Consistent Hashing Example:** Upgraded `skills/be-persist/references/sharding-and-partitioning.md` to 64-bit BigInt hash (preventing 32-bit vnode collisions), added `removeNode()` method, and included explicit production caveats regarding topology rebalancing and distributed engines (Citus, Vitess, Envoy).
+
 ## [1.1.0] - 2026-11-19
 
 ### Hyper-Scale & Distributed Systems Expansion

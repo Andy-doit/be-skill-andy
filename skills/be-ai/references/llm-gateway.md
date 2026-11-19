@@ -18,9 +18,9 @@ Read this when integrating AI models (Gemini, Claude, OpenAI), implementing Retr
 
 ## 3. Rules
 
-### BE-31 One gateway for all model calls
-All LLM and AI model invocations must route through a single backend gateway responsible for secret custody, rate quotas, budget tracking, fallbacks, and usage telemetry. Model API keys must never be exposed to frontend clients.
-- **Why:** Embedding AI keys in client applications results in immediate key theft and uncontrolled billings. Scattered API calls bypass corporate cost caps and privacy governance.
+### BE-31 Unified model gateway policy
+All LLM and AI model invocations must route through a unified architectural gateway facade (whether an in-process platform module or a dedicated standalone proxy service) responsible for secret custody, rate quotas, budget tracking, fallbacks, and usage telemetry. Direct un-metered calls to third-party model providers from feature domains or frontend clients are forbidden.
+- **Why:** Embedding AI keys in client applications results in immediate key theft and uncontrolled billings. Scattered API calls bypass corporate cost caps and privacy governance. Architectural encapsulation allows swapping model providers without touching business code.
 - **Enforced by:** Architecture audit and network egress inspection.
 
 ### BE-32 Fixed-shape chains are code; agent loops require authority boundaries

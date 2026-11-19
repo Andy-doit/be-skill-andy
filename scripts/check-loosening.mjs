@@ -4,6 +4,10 @@
  * Scans files for banned quality-loosening markers (Rule BW-P5).
  * Flags inline suppressions: eslint-disable, @ts-ignore, @ts-nocheck, @ts-expect-error,
  * skipped tests (it.skip, test.skip, xdescribe), focused tests (it.only, fit), || true.
+ * 
+ * NOTE: This is a deterministic pre-commit heuristic scanner. In markdown files, rule citations
+ * inside documentation code spans (enclosed in backticks) or policy tables are permitted.
+ * Source code files (.ts, .js, .go, .py, etc.) are scanned strictly with zero exemptions.
  */
 
 import fs from 'node:fs';

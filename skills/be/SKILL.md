@@ -19,20 +19,28 @@ All skills adhere to the core engineering laws in [conventions.md](../../referen
 
 ---
 
-## 1. Operating Modes
+## 1. Operating Modes & Protocols
 
 The backend skill set operates in two distinct modes:
 
-1. **Build Mode (Plan → Approve → Implement → Verify):**
-   - Read project context first (BW-P1).
-   - Produce a design record with rule citations (BW-P2, BW-P4).
-   - Wait for explicit user confirmation before touching code.
-   - Implement in small batches (<= 3 modules) without loosening gates (BW-P5).
-   - Prove invariants at the real boundary (BW-P10).
-2. **Audit Mode (Read-Only Code Review):**
-   - Read-only inspection of existing code against `BE-*` and `BR-*` rules.
-   - Outputs a findings table: Rule ID, `file:line`, severity, violation snippet, and proposed remedy.
-   - Never mutates code silently (dispatches to `be-audit`).
+### 1.1 Build Mode Protocol (Fast-Path vs Full Protocol)
+
+- **Fast-Path (Execute + Verify in one turn without proposal ceremony):**
+  - **Scope:** $\le 5$ lines in a single file.
+  - **Nature:** Pure cosmetic, typo in logs or comments, error message wording fix, dev port configuration tweak, or single-line import fix.
+  - **Hard Barrier:** Does **NOT** touch Protected Zones (financial/ledger transactions, authentication, permissions, database migrations, or public API contracts).
+- **Full Protocol (Audit → Proposal → User Approval → Implement → Verify):**
+  - **Required for:** Any task $> 5$ lines, multi-file modifications, schema migrations, concurrency control, or touching architectural data flow.
+  - Read project context first (BW-P1).
+  - Produce a design record proposal citing governing rule IDs (BW-P2, BW-P4).
+  - Wait for explicit user confirmation ("chốt", "approved") before touching code.
+  - Implement in small batches ($\le 3$ modules) without loosening gates (BW-P5).
+  - Prove invariants at the real boundary (BW-P10).
+
+### 1.2 Audit Mode (Read-Only Code Review)
+- Read-only inspection of existing code against `BE-*` and `BR-*` rules.
+- Outputs a findings table: Rule ID, `file:line`, severity, violation snippet, and proposed remedy.
+- Never mutates code silently (dispatches to `be-audit`).
 
 ---
 

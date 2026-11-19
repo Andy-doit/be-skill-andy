@@ -38,9 +38,12 @@ Audit checklist for human reviewers and the `be-audit` skill. Every finding must
 | **BE-28**| Real-store integration tests | Check for persistence/concurrency claims verified only with in-memory doubles or loose mocks. | **BLOCKER** |
 | **BE-29**| Contract tests vs schema | Check for consumer tests mocked against source code instead of committed schema. | **WARN** |
 | **BE-30**| Async boundary testing | Check for asynchronous event flows tested only on publisher side without consumer test. | **WARN** |
-| **BE-31**| Single LLM gateway | Check for frontend holding model keys or scattered un-budgeted LLM API calls. | **BLOCKER** |
+| **BE-31**| Single LLM gateway | Check for frontend holding model keys, scattered un-budgeted LLM calls, or lack of unified gateway facade. | **BLOCKER** |
 | **BE-32**| Code chains vs agent loops | Check for unconstrained LLM decision loops without loop budgets or output schemas. | **BLOCKER** |
 | **BE-33**| Scoped RAG & tool authority | Check for vector searches without tenant isolation or tools executing without domain checks. | **BLOCKER** |
+| **BE-34**| Read-after-write consistency | Check for post-mutation redirects or reads routing to asynchronous replicas without write pinning or LSN verification. | **BLOCKER** |
+| **BE-35**| Atomic distributed rate limits | Check for non-atomic GET-then-SET sequences on Redis, unbounded ZSET logs, or undeclared fail-open/fail-close mode. | **BLOCKER** |
+| **BE-36**| Shard key immutability & fencing | Check for OLTP queries omitting the shard key, mutable shard keys, or un-fenced distributed 2PC in online paths. | **WARN** |
 
 ---
 

@@ -3,6 +3,10 @@
 /**
  * Static audit scanner for backend codebases according to BE-* and BR-* rules.
  * Outputs a formatted findings table with Rule IDs, file:line, severity, and remedies.
+ * 
+ * NOTE: This script is a lightweight, zero-dependency pre-flight heuristic scanner.
+ * Deep contextual verification, transaction boundaries, and AST inspection are
+ * evaluated during comprehensive review by the be-audit agent.
  */
 
 import fs from 'node:fs';
@@ -85,20 +89,8 @@ function scanFile(filePath) {
       });
     }
 
-    // BE-25: ambient Date.now() or new Date()
-    if (/(?:Date\.now\(\)|new\s+Date\(\))/i.test(line) && !filePath.includes('test') && !filePath.includes('spec')) {
-      addFinding({
-        ruleId: 'BE-25',
-        file: relPath,
-        line: lineNum,
-        severity: 'WARN',
-        evidence: trimmed,
-        remedy: 'Inject ClockPort interface into constructor; avoid ambient non-deterministic time.'
-      });
-    }
-
-    // BE-25: ambient Date.now() or new Date() in domain files
-    if (/(?:Date\.now\(\)|new\s+Date\(\))/i.test(line) && !filePath.includes('test') && !filePath.includes('spec') && (filePath.includes('service') || filePath.includes('model') || filePath.includes('domain'))) {
+    // BE-25: ambient Date.now() or new Date() in domain/service logic
+    if (/(?:Date\.now\(\)|new\s+Date\(\))/i.test(line) && !filePath.includes('test') && !filePath.includes('spec') && (filePath.includes('service') || filePath.includes('model') || filePath.includes('domain') || filePath.includes('use-case'))) {
       addFinding({
         ruleId: 'BE-25',
         file: relPath,
