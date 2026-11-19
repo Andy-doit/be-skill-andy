@@ -98,3 +98,40 @@ To transform `be-skill-andy` into a complete, portable backend engineering stand
    - Generic rules remain 100% stack-neutral in the core skills.
    - `profiles/nestjs/`: Dedicated profile implementing the rules for NestJS + TypeORM + PostgreSQL + BullMQ + Redis.
    - `profiles/template/`: Template for other frameworks (Express, Fastify, Prisma, Drizzle, etc.).
+
+---
+
+## 5. Final Implemented State Matrix (All 30 Topics Completed)
+
+| # | Topic | Implemented Location | Quality | Status | Rules Enforced |
+|---|---|---|:---:|:---:|---|
+| 1 | Architecture & Layering | `skills/be-arch/references/layering.md` | ok | Complete | BE-23, BE-24, BR-2 |
+| 2 | Folder / Feature Shape | `skills/be-arch/references/folder-structure.md` | ok | Complete | BE-24, BR-1 |
+| 3 | API Design & Transport | `skills/be-api/references/api-design.md` | ok | Complete | BE-7, BE-27, BR-1 |
+| 4 | Authentication & Session | `skills/be-auth/references/session-and-tokens.md` | ok | Complete | BE-17 |
+| 5 | Authorization | `skills/be-authz/references/resource-authz.md` | ok | Complete | BE-14, BE-15, BR-4 |
+| 6 | Input Validation & Abuse Limits | `skills/be-sec/references/abuse-limits.md` | ok | Complete | BE-16 |
+| 7 | Errors | `skills/be-api/references/error-handling.md` | ok | Complete | BE-20 |
+| 8 | Persistence & Migrations | `skills/be-persist/references/migrations-schema.md` | ok | Complete | BE-1, BE-7 |
+| 9 | Transactions & Concurrency | `skills/be-persist/references/transactions.md` | ok | Complete | BE-3, BE-6 |
+| 10| Idempotency | `skills/be-async/references/idempotency.md` | ok | Complete | BE-8, BE-9 |
+| 11| Outbox, Events & Queues | `skills/be-async/references/outbox-and-events.md` | ok | Complete | BE-2, BE-7 |
+| 12| Jobs & Scheduling | `skills/be-async/references/jobs-scheduling.md` | ok | Complete | BE-10, BE-11, BE-13 |
+| 13| Sagas / Long Flows | `skills/be-async/references/sagas.md` | ok | Complete | BE-12, BR-5 |
+| 14| Webhooks (Incoming) | `skills/be-api/references/webhooks.md` | ok | Complete | BE-18, BE-8 |
+| 15| Realtime | `skills/be-api/references/realtime.md` | ok | Complete | BR-3, BR-4 |
+| 16| Outbound Integrations & Resilience | `skills/be-resilience/references/outbound-resilience.md` | ok | Complete | BE-23, BR-5 |
+| 17| Configuration & Secrets | `skills/be-ops/references/config-secrets.md` | ok | Complete | BE-19, BW-P6 |
+| 18| Logging, Tracing, Metrics, Audit | `skills/be-ops/references/observability.md` | ok | Complete | BE-21, BW-P6 |
+| 19| Health & Lifecycle | `skills/be-ops/references/lifecycle.md` | ok | Complete | BE-22, BR-6 |
+| 20| Time, IDs & Determinism | `skills/be-arch/references/determinism.md` | ok | Complete | BE-25 |
+| 21| Caching | `skills/be-resilience/references/caching.md` | ok | Complete | BR-3 |
+| 22| Search, Files & Storage | `skills/be-resilience/references/storage-files.md` | ok | Complete | BE-16, BR-4 |
+| 23| AI / LLM Integration | `skills/be-ai/references/llm-gateway.md` | ok | Complete | BE-31, BE-32, BE-33 |
+| 24| Testing Strategy | `skills/be-test/references/test-pyramid.md` | ok | Complete | BE-28, BW-P10, BR-7 |
+| 25| Performance & Capacity | `skills/be-ops/references/performance-capacity.md` | ok | Complete | BE-16 |
+| 26| Security Hardening & Supply Chain | `skills/be-sec/references/security-hardening.md` | ok | Complete | BE-17, BE-19 |
+| 27| Delivery & Operations | `skills/be-ops/references/delivery-operations.md` | ok | Complete | BE-1, BR-6 |
+| 28| Documentation | `skills/be-arch/references/documentation.md` | ok | Complete | BW-P1, BW-P4 |
+| 29| Data Privacy & Compliance | `skills/be-sec/references/privacy-compliance.md` | ok | Complete | BE-21, BR-3 |
+| 30| Code Quality | `skills/be-arch/references/code-quality.md` | ok | Complete | BE-26, BR-2 |
