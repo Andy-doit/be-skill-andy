@@ -2,7 +2,7 @@
   "name": "be-skill-andy",
   "displayName": "Andy Backend Engineering Skills",
   "description": "Comprehensive backend engineering standard and architectural skills. Audit-first workflow, 4-tier layering, transactional outbox, idempotency, robust migrations, zero-dependency check scripts, and production hardening.",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "suggestedPrompts": [
     "/be",
     "/be-arch",

@@ -12,8 +12,9 @@
   <a href="#3-vũ-khí-kỹ-thuật-cốt-lõi"><img src="https://img.shields.io/badge/Kiến_trúc-4--Tier_Inversion-38bdf8?style=flat-square" alt="Architecture" /></a>
   <a href="#kỷ-luật-cổng-thép-zero-loosening-gate"><img src="https://img.shields.io/badge/Cổng_chất_lượng-Zero_Loosening-10b981?style=flat-square" alt="Gates" /></a>
   <a href="#thư-mục-13-kỹ-năng-rành-mạch-skills-directory"><img src="https://img.shields.io/badge/Hệ_kỹ_năng-13_Skills-818cf8?style=flat-square" alt="Skills" /></a>
-  <a href="#4-case-studies-thực-chiến"><img src="https://img.shields.io/badge/Thực_chiến-4_Case_Studies-eab308?style=flat-square" alt="Case Studies" /></a>
+  <a href="#6-case-studies-thực-chiến-bao-gồm-hyper-scale"><img src="https://img.shields.io/badge/Thực_chiến-6_Case_Studies-eab308?style=flat-square" alt="Case Studies" /></a>
   <a href="#cài-đặt-trong-30-giây-1-click-setup"><img src="https://img.shields.io/badge/Cài_đặt-1--Click_Setup-f59e0b?style=flat-square" alt="Install" /></a>
+  <img src="https://img.shields.io/badge/Phiên_bản-v1.1.1-blue?style=flat-square" alt="Version" />
 </p>
 
 </div>
@@ -170,18 +171,18 @@ Router trung tâm `be` tự động phân loại yêu cầu và điều phối �
 | **API, Hợp đồng & Transport** | [`be-api`](./skills/be-api/) | Hợp đồng OpenAPI/GraphQL committed, closed-enum errors, webhook signature first, SSE/WS (BE-7, BE-18, BE-20, BE-27) |
 | **Xác thực & Phiên làm việc** | [`be-auth`](./skills/be-auth/) | Cookie bảo mật (HttpOnly, Secure, SameSite), CSRF origin check, so sánh constant-time, Argon2id (BE-17) |
 | **Phân quyền & Multi-Tenant** | [`be-authz`](./skills/be-authz/) | Default-deny tại mọi cửa vào, kiểm tra quyền tài nguyên ở domain service, Postgres RLS (BE-14, BE-15) |
-| **Dữ liệu & Giao dịch** | [`be-persist`](./skills/be-persist/) | Migrations là thẩm quyền duy nhất (BE-1), cấm gọi ngoài trong transaction (BE-3), ràng buộc atomic SQL (BE-6) |
-| **Bất đồng bộ & Hàng đợi** | [`be-async`](./skills/be-async/) | Transactional outbox (BE-2), idempotency key (BE-9), job fencing (BE-10), retry ladder (BE-11), sagas (BE-12) |
+| **Dữ liệu & Giao dịch** | [`be-persist`](./skills/be-persist/) | Migrations là thẩm quyền duy nhất (BE-1), cấm gọi ngoài trong transaction (BE-3), ràng buộc atomic SQL (BE-6), Read-After-Write consistency (BE-34), sharding & partitioning (BE-36) |
+| **Bất đồng bộ & Hàng đợi** | [`be-async`](./skills/be-async/) | Transactional outbox (BE-2), idempotency key (BE-9), job fencing (BE-10), retry ladder (BE-11), sagas (BE-12), CDC outbox qua Debezium |
 | **Khả năng phục hồi & Cache** | [`be-resilience`](./skills/be-resilience/) | Timeout bắt buộc (BE-23), circuit breaker, cache delete-on-write (BR-3), pre-signed URL S3 (BE-16) |
 | **Vận hành & Cấu hình** | [`be-ops`](./skills/be-ops/) | Validate config tại boot (BE-19), structured logger có correlation ID (BE-21), tách riêng liveness/readiness (BE-22) |
-| **Bảo mật & Giới hạn** | [`be-sec`](./skills/be-sec/) | Chặn đứng SSRF, giới hạn kích thước mảng/string (BE-16), cấu hình CORS nghiêm ngặt, tuân thủ PII/GDPR |
+| **Bảo mật & Giới hạn** | [`be-sec`](./skills/be-sec/) | Chặn đứng SSRF, giới hạn kích thước mảng/string (BE-16), Rate Limiting phân tán nguyên tử bằng Redis Lua (BE-35), CORS, PII/GDPR |
 | **Chiến lược Kiểm thử** | [`be-test`](./skills/be-test/) | Kiểm thử tích hợp trên DB/Broker thật (BE-28), strict typed doubles, contract testing với schema (BE-29, BE-30) |
 | **Tích hợp Trí tuệ Nhân tạo**| [`be-ai`](./skills/be-ai/) | Cổng Gateway LLM tập trung (BE-31), chuỗi code cố định vs agent loop, bảo mật RAG theo tenant (BE-32, BE-33) |
-| **Kiểm toán Mã nguồn (Audit)**| [`be-audit`](./skills/be-audit/) | Chế độ đọc soát lỗi (Read-Only), xuất bảng vi phạm chi tiết kèm rule ID, `file:line`, severity và cách sửa |
+| **Kiểm toán Mã nguồn (Audit)**| [`be-audit`](./skills/be-audit/) | Chế độ đọc soát lỗi (Read-Only) toàn bộ 36 luật BE-1..36, xuất bảng vi phạm chi tiết kèm rule ID, `file:line`, severity và cách sửa |
 
 ---
 
-### 4 Case Studies Thực Chiến
+### 6 Case Studies Thực Chiến (Bao gồm Hyper-Scale)
 
 Xem tài liệu chi tiết tại: [references/case-studies.md](references/case-studies.md)
 
@@ -189,6 +190,8 @@ Xem tài liệu chi tiết tại: [references/case-studies.md](references/case-s
 2. **Webhook Intake & Async Event Bus Relay:** Nhận webhook Stripe với chữ ký HMAC constant-time, nạp vào bảng inbox trong 50ms và đẩy công việc nặng cho BullMQ worker với thang retry có giới hạn.
 3. **Zero-Downtime Database Migration:** Kỹ thuật Expand-and-Contract chia tách cột trên bảng 5 triệu dòng mà không cần downtime, không làm sập các container phiên bản cũ.
 4. **Multi-Tenant B2B SaaS Isolation & Row-Level Security:** Kết hợp phòng thủ 3 lớp (Door Default-Deny -> Domain Service Verification -> PostgreSQL Row-Level Security) ngăn chặn hoàn toàn lỗ hổng IDOR.
+5. **Distributed Tiered Rate Limiting under 100,000 RPS Attack:** Phòng thủ 3 tầng (Edge IP drop -> Redis Lua Sliding Window Counter $O(1)$ RAM -> Downstream Semaphore Protection) chặn đứng bão request mà không nổ bộ nhớ.
+6. **Read-After-Write Consistency across Multi-Region PostgreSQL Replicas:** Giải quyết bài toán trễ replication xuyên lục địa (US Primary -> Tokyo Replica) bằng Session Write Pinning & LSN Tracking, triệt tiêu 100% lỗi phantom 404 sau khi đặt hàng.
 
 ---
 
@@ -232,7 +235,7 @@ node scripts/audit-backend.mjs ../my-backend-project
 ### 📜 Quy chuẩn Chia sẻ & Governance
 
 - [conventions.md](references/conventions.md) — 14 Luật quy trình (`BW-P1..P14`) & 7 Nghĩa vụ review (`BR-1..7`).
-- [case-studies.md](references/case-studies.md) — 4 Kịch bản thực chiến chi tiết từ A-Z.
+- [case-studies.md](references/case-studies.md) — 6 Kịch bản thực chiến chi tiết từ A-Z (kèm Hyper-Scale).
 - [project-profile.template.md](references/project-profile.template.md) — File mẫu khai báo kiến trúc dự án (agent đọc đầu tiên).
 - [design-record.template.md](references/design-record.template.md) — Mẫu Architectural Decision Record (ADR) chứng minh cơ chế nhỏ nhất (BW-P4).
 - [api-contract-change.md](references/api-contract-change.md) — Checklist thay đổi hợp đồng API additive vs breaking.
