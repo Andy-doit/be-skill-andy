@@ -186,3 +186,13 @@
   - `node scripts/check-secrets.mjs`: 0 leaks.
   - `node scripts/audit-backend.mjs skills`: 0 violations.
 - **Status:** Complete & verified.
+
+## 2026-11-19 — Release v1.1.1 & Multi-Tool Full Sync
+
+- **Action:** Bumped version to `v1.1.1` across all manifests (`plugin.json`, `.antigravity-plugin/plugin.json`, `.claude-plugin/plugin.json`), updated `README.md` with 6 Case Studies and v1.1.1 badge, and re-synced all tools.
+- **Tools Synced via `scripts/install-skills.ps1`:**
+  - **Claude Code:** `C:\Users\Endy\.claude\skills\` (All 13 skills active).
+  - **Codex:** `C:\Users\Endy\.agents\skills\` (All 13 skills linked via junctions).
+  - **Antigravity:** `C:\Users\Endy\.gemini\config\plugins\be-skill-andy` (staged with `plugin.json` v1.1.1, `README.md`, `rules/`, and `skills` junction).
+- **Git Commit:** `4467cdb` pushed to `origin/master`.
+- **Status:** Complete & fully verified.
