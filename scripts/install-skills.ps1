@@ -82,32 +82,87 @@ foreach ($tool in $Selected) {
 
 # Register as Antigravity Plugin if Antigravity is selected
 if ($Selected -contains "antigravity" -or $Selected -contains "all") {
-  $pluginDst = Join-Path $HomeDir ".gemini\config\plugins\be-skill-andy"
+  $geminiConfigDir = Join-Path $HomeDir ".gemini\config"
+  $geminiSkillsJson = Join-Path $geminiConfigDir "skills.json"
+  $pluginDst = Join-Path $geminiConfigDir "plugins\be-skill-andy"
   Write-Host "`n== Registering Antigravity Plugin -> $pluginDst =="
   
   if ($Uninstall) {
     if (Test-Path $pluginDst) {
-      $item = Get-Item $pluginDst
-      if ($item.LinkType -eq "Junction") {
-        $item.Delete()
-        Write-Host "  [Removed Plugin Junction]: be-skill-andy"
+      $pSkills = Join-Path $pluginDst "skills"
+      if (Test-Path $pSkills) {
+        $pItem = Get-Item $pSkills
+        if ($pItem.LinkType -eq "Junction") { $pItem.Delete() }
       }
+      Remove-Item -Path $pluginDst -Recurse -Force -ErrorAction SilentlyContinue
+      Write-Host "  [Removed Plugin Directory]: be-skill-andy"
     }
   } else {
-    $pluginDirParent = Split-Path $pluginDst -Parent
-    if (-not (Test-Path $pluginDirParent)) {
-      New-Item -ItemType Directory -Force -Path $pluginDirParent | Out-Null
-    }
+    # If pluginDst is an old junction to repo root, remove the junction first
     if (Test-Path $pluginDst) {
       $item = Get-Item $pluginDst
-      if ($item.LinkType -eq "Junction" -and "$($item.Target)" -eq $RepoRoot) {
-        Write-Host "  [OK] Plugin already linked: be-skill-andy"
-      } else {
-        Write-Warning "  [SKIP] Plugin path exists: $pluginDst"
+      if ($item.LinkType -eq "Junction") {
+        cmd /c rmdir "$pluginDst"
+        Write-Host "  [Cleaned old plugin junction]"
       }
-    } else {
-      New-Item -ItemType Junction -Path $pluginDst -Target $RepoRoot | Out-Null
-      Write-Host "  [Linked Plugin]: be-skill-andy -> $RepoRoot"
+    }
+    
+    if (-not (Test-Path $pluginDst)) {
+      New-Item -ItemType Directory -Force -Path $pluginDst | Out-Null
+    }
+
+    # Copy plugin.json, README.md, rules
+    $pluginJsonSrc = if (Test-Path (Join-Path $RepoRoot "plugin.json")) { Join-Path $RepoRoot "plugin.json" } else { Join-Path $RepoRoot ".antigravity-plugin\plugin.json" }
+    $readmeSrc = Join-Path $RepoRoot "README.md"
+    $rulesSrc = Join-Path $RepoRoot "rules"
+
+    if (Test-Path $pluginJsonSrc) {
+      Copy-Item -Path $pluginJsonSrc -Destination (Join-Path $pluginDst "plugin.json") -Force
+      Write-Host "  [Configured plugin.json]: $pluginDst\plugin.json"
+    }
+    if (Test-Path $readmeSrc) {
+      Copy-Item -Path $readmeSrc -Destination (Join-Path $pluginDst "README.md") -Force
+    }
+    if (Test-Path $rulesSrc) {
+      $dstRules = Join-Path $pluginDst "rules"
+      if (-not (Test-Path $dstRules)) { New-Item -ItemType Directory -Force -Path $dstRules | Out-Null }
+      Copy-Item -Path (Join-Path $rulesSrc "*") -Destination $dstRules -Force -Recurse
+      Write-Host "  [Copied rules]: $dstRules"
+    }
+
+    # Link skills as directory junction inside the plugin folder
+    $pluginSkillsJunction = Join-Path $pluginDst "skills"
+    if (Test-Path $pluginSkillsJunction) {
+      $pItem = Get-Item $pluginSkillsJunction
+      if ($pItem.LinkType -eq "Junction") {
+        cmd /c rmdir "$pluginSkillsJunction"
+      } else {
+        Remove-Item -Recurse -Force $pluginSkillsJunction
+      }
+    }
+    New-Item -ItemType Junction -Path $pluginSkillsJunction -Target $SrcSkills | Out-Null
+    Write-Host "  [Linked plugin skills junction]: $pluginSkillsJunction -> $SrcSkills"
+  }
+
+  # Update skills.json entries if present
+  if (Test-Path $geminiSkillsJson) {
+    try {
+      $json = Get-Content $geminiSkillsJson -Raw | ConvertFrom-Json
+      if ($json.entries) {
+        $normalizedSrc = $SrcSkills.Replace("\", "/")
+        $existing = $json.entries | Where-Object { "$($_.path)".Replace("\", "/").ToLower() -eq $normalizedSrc.ToLower() }
+        if (-not $existing -and -not $Uninstall) {
+          $json.entries += [PSCustomObject]@{ path = $normalizedSrc }
+          $json | ConvertTo-Json -Depth 5 | Set-Content -Path $geminiSkillsJson -Encoding UTF8
+          Write-Host "  [Updated skills.json]: Added $normalizedSrc"
+        } elseif ($existing -and $Uninstall) {
+          $json.entries = @($json.entries | Where-Object { "$($_.path)".Replace("\", "/").ToLower() -ne $normalizedSrc.ToLower() })
+          $json | ConvertTo-Json -Depth 5 | Set-Content -Path $geminiSkillsJson -Encoding UTF8
+          Write-Host "  [Updated skills.json]: Removed $normalizedSrc"
+        }
+      }
+    } catch {
+      Write-Warning "Could not update Antigravity skills.json: $_"
     }
   }
 }
