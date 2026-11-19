@@ -117,3 +117,17 @@
     3. Zero-Downtime Database Migration (Expand-and-Contract column split).
     4. Multi-Tenant B2B SaaS Isolation & PostgreSQL Row-Level Security.
 - **Verification:** Ran `check-skills.mjs`, `check-loosening.mjs`, and `check-secrets.mjs` — all passed cleanly with 0 errors.
+
+## 2026-11-19 — Antigravity Plugin Slash-Command Autocomplete Fix
+
+- **Issue:** User reported typing `/be` in a new workspace (`nestjs-backend`) did not show `/be` in the slash command popup, while `/fe-*` commands showed up under "Andy Frontend Agent Skills".
+- **Root Cause Analysis:**
+  1. `C:\Users\Endy\.gemini\config\plugins\be-skill-andy` was initially a junction to repo root instead of a structured plugin directory with `plugin.json` at root.
+  2. In `plugin.json`, `suggestedPrompts` entries lacked the leading `/` (had `"be"`, `"be-arch"` instead of `"/be"`, `"/be-arch"`).
+  3. `C:\Users\Endy\.gemini\config\skills.json` was missing `D:/work/AI/be-skill-andy/skills`.
+- **Fix Applied:**
+  1. Staged `C:\Users\Endy\.gemini\config\plugins\be-skill-andy` as a clean plugin folder with `plugin.json`, `README.md`, `rules/AGENTS.md`, and a junction `skills` -> `D:\work\AI\be-skill-andy\skills` (identical structure to `fe-skill-andy`).
+  2. Fixed `suggestedPrompts` in `plugin.json` to include explicit leading `/` on all 13 prompts (`/be`, `/be-arch`, `/be-api`, ...).
+  3. Added `D:/work/AI/be-skill-andy/skills` to `C:\Users\Endy\.gemini\config\skills.json`.
+  4. Re-ran `scripts/install-skills.ps1 -Tools antigravity` and verified all paths.
+  5. Committed and pushed to GitHub remote (commit `92ca8ef`).
